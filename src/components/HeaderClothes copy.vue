@@ -15,6 +15,8 @@ const jumlahKeranjang = ref(0);
 const userName = authStore.user?.name;
 const user_role = authStore.user?.role;
 
+
+
 const checkInactivity = () => {
 
   if (!authStore?.user) {
@@ -71,18 +73,10 @@ const handleLogout = async () => {
   }
 };
 
-// Mengatur agar ketika belum login maka, akan ke arah login
-const notUser = () => {
-  if (!authStore.user) {
-    alert('tidak ada user bro')
-    
-  }
-}
 
 let intervalId;
 
 onMounted(() => {
-  // notUser()
 
   if (authStore?.user) {
 
@@ -184,7 +178,7 @@ onUnmounted(() => {
                 </ul>
               </div>
             </li>
-            <li class="nav-item okee" @click="notUser">
+            <li class="nav-item okee">
               <router-link class="nav-link" to="/cart">
                 <h3 class="oke">
                   <i class="bi bi-cart-plus"></i>

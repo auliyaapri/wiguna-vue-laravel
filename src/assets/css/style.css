@@ -1,0 +1,22 @@
+.product-item {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.title_products { 
+    font-size: 1.3rem !important;
+    margin-left: -15px;
+}
+
+
+.reviews_product {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 19.5px;
+    text-decoration: none;
+    color: #F33F3F;
+    text-align: left;
+    word-spacing: 0px;
+}
+

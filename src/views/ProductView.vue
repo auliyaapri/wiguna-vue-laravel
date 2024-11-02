@@ -1,5 +1,58 @@
 <script setup>
+import { createApp, ref, onMounted } from "vue";
+
 import HeaderClothes from "@/components/HeaderClothes.vue";
+import axios from "axios";
+
+const getAllProducts = ref([]);
+const getAllCategories = ref([]);
+
+
+const getCategories = () => {
+
+  // Make a request for a user with a given ID
+  axios.get('http://wiguns-backend.test/api/category')
+    .then(function (response) {
+      getAllCategories.value = response.data.data;
+      console.log(response);
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
+    .finally(function () {
+      // always executed
+    });
+
+}
+
+onMounted(() => {
+  getCategories(); // Memanggil getCategories untuk mendapatkan kategori
+
+  axios
+    .get("http://wiguns-backend.test/api/products")
+    .then((response) => {
+      getAllProducts.value = response.data.data.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
+
+
+const truncateDescription = (description) => {
+  const maxLength = 150;
+  if (description.length > maxLength) {
+    return description.substring(0, maxLength) + '...';
+  }
+  return description;
+
+
+}
+
+//  Truncate description
+
 </script>
 
 <template>
@@ -20,6 +73,14 @@ import HeaderClothes from "@/components/HeaderClothes.vue";
   <div class="products">
     <div class="container">
       <div class="row">
+        <h1>ijjoi</h1>
+        <ul>
+          <li v-for="okee in getAllCategories" :key="okee.id">dfdf</li>
+        </ul>
+      </div>
+
+
+      <div class="row">
         <div class="col-md-12">
           <div class="filters">
             <ul>
@@ -28,162 +89,57 @@ import HeaderClothes from "@/components/HeaderClothes.vue";
               <li data-filter=".dev">Flash Deals</li>
               <li data-filter=".gra">Last Minute</li>
             </ul>
+            <!-- Menampilkan kategori -->
+            <ul>
+              <li v-for="categoryItem in getAllCategories" :key="categoryItem.id">
+                <h4>{{ categoryItem.name }}</h4>
+              </li>
+            </ul>
           </div>
         </div>
-        <div class="col-md-12">
-          <div class="filters-content">
-            <div class="row grid">
-              <div class="col-lg-4 col-md-4 all des">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$18.25</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (12)</span>
+
+
+        <div v-if="getAllProducts.length > 0">
+
+          <div class="col-md-12">
+            <div class="filters-content">
+              <div class="row grid">
+                <div class="col-lg-4 col-md-4 all des" v-for="product in getAllProducts" :key="product.id">
+                  <div class="product-item">
+                    <router-link v-bind:to="`/detail/${product.id}`">
+                      <img v-bind:src="product.galleries[0].photo" alt="fsdf" class="pt-2" />
+                    </router-link>
+                    <h1>{{ product.photo }}</h1>
+
+                    <!-- <h1>{{product.category.name}}</h1> -->
+
+                    <div class="down-content">
+                      <div style="height: 35px;">
+                        <div class="d-flex flex-column">
+                          <h4 class="lh-sm">{{ product.name }}</h4>
+                          <h4 class="lh-sm text-black">Kategori: {{ product.category.name }}</h4>
+                        </div>
+                        <h6 class="pt-4 text-black">Rp. {{ product.price }}</h6>
+                      </div>
+                      <p v-html="truncateDescription(product.description)"></p>
+
+                      <div class="d-flex justify-content-between align-items-center">
+                        <router-link v-bind:to="`/detail/${product.id}`">
+                          <button class="btn btn-danger">Buy</button>
+                        </router-link>
+                        <span>Reviews (21)</span>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
-              </div>
-              <div class="col-lg-4 col-md-4 all dev">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$16.75</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (24)</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-4 all gra">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$32.50</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (36)</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-4 all gra">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$24.60</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (48)</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-4 all dev">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$18.75</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (60)</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-4 all des">
-                <div class="product-item">
-                  <a href="#"
-                    ><img src="@/assets/img/product_02.jpg" alt=""
-                  /></a>
-                  <div class="down-content">
-                    <a href="#"><h4>Tittle goes here</h4></a>
-                    <h6>$12.50</h6>
-                    <p>
-                      Lorem ipsume dolor sit amet, adipisicing elite. Itaque,
-                      corporis nulla aspernatur.
-                    </p>
-                    <ul class="stars">
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                      <li><i class="fa fa-star"></i></li>
-                    </ul>
-                    <span>Reviews (72)</span>
-                  </div>
-                </div>
+                <!-- dd -->
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-12">
-          <ul class="pages">
-            <li><a href="#">1</a></li>
-            <li class="active"><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li>
-              <a href="#"><i class="fa fa-angle-double-right"></i></a>
-            </li>
-          </ul>
+        <div v-else>
+          <h1>sajdsj</h1>
         </div>
       </div>
     </div>

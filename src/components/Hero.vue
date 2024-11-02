@@ -2,9 +2,7 @@
 
 </script>
 
-<template>
-   
-        
+<template>           
     <div id="carouselExample" class="carousel slide">
     <div class="carousel-inner banner header-text">
       <div class="carousel-item active banner-item-01">

@@ -9,10 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^43.1.0",
+    "@ckeditor/ckeditor5-vue": "^7.0.0",
     "@popperjs/core": "^2.11.8",
     "aos": "^3.0.0-beta.6",
+    "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
-    "pinia": "^2.1.7",
+    "ckeditor5": "^43.1.0",
+    "pinia": "^2.2.4",
+    "vue": "^3.5.11",
     "vue-router": "^4.4.0"
   },
   "devDependencies": {
