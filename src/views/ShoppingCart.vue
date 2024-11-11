@@ -3,135 +3,27 @@ import router from "@/router";
 import axios from "axios";
 import { ref, onMounted, watch, toRaw } from "vue";
 import { useAuthStore } from '@/stores/authStore';
+import { useCartStore } from "@/stores/Cart";
+
 // State untuk menyimpan jumlah item dalam keranjang
-const keranjangUser = ref([]);
-const keranjangBorderd = ref([]);
+// const keranjangUser = ref([]);
 const authStore = useAuthStore(); // Inisialisasi store
+
+// ==== Untuk melihat keranjang berdasarkan token login 
+const cartStore = useCartStore();
 
 const user = ref({ ...authStore.user }); // Salin data pengguna
 const totalHarga = ref(0);
 const pajak = ref(0);
 
-const frekuensiId = ref({});
-
-const hitungFrekuensiId = (keranjangArray) => {
-  console.log("Data Keranjang Array:", keranjangArray);
-
-  const frekuensi = {};
-
-  console.log(`fddfdfdfdfds`, frekuensi);
-
-
-
-  keranjangArray.forEach((item) => {
-    const id = item.id;
-    if (frekuensi[id]) {
-      frekuensi[id]++;
-    } else {
-      frekuensi[id] = 1;
-    }
-  });
-  // Menampilkan frekuensi ID ke console
-  frekuensiId.value = frekuensi; // Simpan hasil perhitungan frekuensi ke dalam state
-}
-
-
-// ==== Hapus keranjang item ====
-const removeItem = (id) => {
-  keranjangUser.value = keranjangUser.value.filter((item) => item.id !== id);
-  localStorage.setItem("keranjangUser", JSON.stringify(keranjangUser.value));
-  console.log(`Item dengan id ${id} telah dihapus`);
-  updateTotalHarga();
-  router.push({ path: '/' });
-
-};
-
-// ==== Total Harga keranjang ====
-const sum = (items) => {
-  return items.reduce((total, item) => total + item.priceProduct, 0);
-};
-const updateTotalHarga = () => {
-  totalHarga.value = sum(keranjangUser.value);
-};
-
-const bayarPajak = () => {
-  pajak.value = totalHarga.value * 10 / 100;
-  console.log('pajak bre', pajak.value);
-}
-
-const decreaseQuantity = (id) => {
-  const item = keranjangUser.value.find((product) => product.id === id);
-  if (item && item.quantity > 1) {
-    item.quantity--; // Mengurangi kuantitas
-    localStorage.setItem("keranjangUser", JSON.stringify(keranjangUser.value)); // Simpan perubahan di localStorage
-    updateTotalHarga(); // Update total harga
-  } else {
-    console.log('Quantity sudah minimum'); // Jika quantity sudah 1, tidak bisa dikurangi
-  }
-};
-
-const increaseQuantity = (id) => {
-  const item = keranjangUser.value.find((product) => product.id === id);
-  item.quantity++;
-  localStorage.setItem("keranjangUser", JSON.stringify(keranjangUser.value));
-  updateTotalHarga();
-};
-
-
-const checkout = () => {
-  if (!user.value.no_hp) {
-    alert('Anda Masih ada data yang kosong, segera update bre')
-    router.push('/profileUser')
-  }
-}
 
 // Lifecycle hook yang dijalankan saat komponen di-mount
 onMounted(() => {
 
+  cartStore.fetchCart(); //
+
   // Ambil data keranjang dari localStorage
-  const storedKeranjang = localStorage.getItem("keranjangUser");
-
-  if (storedKeranjang) {
-    try {
-      const parsedKeranjang = JSON.parse(storedKeranjang);
-      // console.log(`ini adalah parsedKeranjang`, parsedKeranjang);
-
-      keranjangUser.value = JSON.parse(storedKeranjang);
-      keranjangBorderd.value = parsedKeranjang;
-      const keranjangArray = JSON.parse(storedKeranjang);
-
-      // console.log(`ini merupakan keranjangBorderd`, toRaw(keranjangBorderd.value));
-
-
-      // console.log("dibawah adalah id get yaa");
-      console.log(keranjangUser.value.map((item) => item.priceProduct + 5000));
-
-      const frekuensi = new Map();
-
-      keranjangUser.value.forEach((item) => {
-        const id = item.id;
-        frekuensi.set(id, (frekuensi.get(id) || 0) + 1);
-      });
-
-      hitungFrekuensiId(keranjangArray);
-
-      updateTotalHarga();
-
-      bayarPajak();
-      // Hitung total harga
-      const totalHarga = sum(keranjangUser.value);
-      const totalHargaPajak = pajak.value + totalHarga;
-      console.log(`Harga. ${totalHarga}`);
-
-      // console.log("Frekuensi id:", [...frekuensi.entries()]);
-      // console.log('keranjang', keranjangArray);
-      // HASILNYA INI 
-
-    } catch (error) {
-      console.error("Error parsing JSON from localStorage", error);
-    }
-  }
-
+  // const storedKeranjang = localStorage.getItem("keranjangUser");
 });
 
 </script>
@@ -159,6 +51,9 @@ onMounted(() => {
       <!-- Table -->
       <div class="row" data-aos="fade-up" data-aos-delay="100">
         <div class="col-8 table-responsive">
+          <h3>User yang sekarang login <div class="text-danger"> {{ user.name }}</div>
+          </h3>
+
           <table class="table table-bordered table-cart">
             <thead>
               <tr>
@@ -169,36 +64,41 @@ onMounted(() => {
                 <td>Menu</td>
               </tr>
             </thead>
+
             <tbody>
-              <tr v-for="item in keranjangUser" :key="item.id">
-                <td style="width: 20%">
-                  <img :src="`${item.photoProduct}`" alt="" class="cart-image w-100" />
-                </td>
-                <td style="width: 35%">
-                  <div class="product-title">{{ item.name }}</div>
-                  <div class="product-subtitle">By Andi Sukka</div>
-                </td>
-                <td style="width: 35%">
-                  <div class="product-title">{{ item.priceProduct }}</div>
-                  <div class="product-subtitle">USD</div>
-                </td>
-                <!-- <td>{{ item.quantity}}</td> -->
-                <td>
-                  <div class="d-flex align-items-center">
+              <div v-if="cartStore.items.length > 0">
 
-                    <button class="btn btn-secondary btn-sm" @click="decreaseQuantity(item.id)">-</button>
-                    <span class="pl-2 pr-2">{{ item.quantity }}</span>
 
-                    <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
-                  </div>
-                </td>
+                <tr v-for="item in cartStore.items" :key="item.id">
+          
+                  <td style="width: 35%">
+                    <div class="product-title">{{ item.name }}</div>
+                    <div class="product-subtitle">By Andi Sukka</div>
+                  </td>
+                  <td style="width: 35%">
+                    <div class="product-title">{{ item.priceProduct }}</div>
+                    <div class="product-subtitle">USD</div>
+                  </td>
+                  <!-- <td>{{ item.quantity}}</td> -->
+                  <td>
+                    <div class="d-flex align-items-center">
 
-                <td style="width: 20%">
-                  <button class="btn btn-danger" @click="removeItem(item.id)">
-                    Remove
-                  </button>
-                </td>
-              </tr>
+                      <button class="btn btn-secondary btn-sm" @click="decreaseQuantity(item.id)">-</button>
+                      <span class="pl-2 pr-2">{{ item.quantity }}</span>
+
+                      <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
+                    </div>
+                  </td>
+
+                  <td style="width: 20%">
+                    <button class="btn btn-danger" @click="removeItem(item.id)">
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+
+              </div>
+
               <tr>
                 <th scope="row" colspan="2" class="text-center">
                   Total Belanja
@@ -245,26 +145,45 @@ onMounted(() => {
       <form class="mb-3" @submit.prevent="checkout">
         <div class="mb-3">
           <label for="name" class="form-label">name</label>
-          <input type="text" class="form-control" id="name" v-model="user.name"/>
+          <input type="text" class="form-control" id="name" v-model="user.name" />
         </div>
         <div class="mb-3">
           <label for="exampleInputEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" v-model="user.email"/>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+            v-model="user.email" />
         </div>
         <div class="mb-3">
           <label for="noHp" class="form-label">No HP</label>
-          <input type="text" class="form-control" id="noHp" />
+          <input type="text" class="form-control" id="noHp" v-model="user.no_hp" />
         </div>
         <div class="mb-3">
           <label for="zip" class="form-label">Zip Code</label>
-          <input type="text" class="form-control" id="zip" />
+          <input type="text" class="form-control" id="zip" v-model="user.zip_code" />
         </div>
         <div class="mb-3">
           <label for="state" class="form-label">Alamat Lengkap</label>
-          <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px" v-model="user.address"></textarea>
+          <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"
+            v-model="user.address"></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
   </section>
+
+  <div v-if="cartStore.items.length > 0">
+    <ul>
+      <li v-for="item in cartStore.items" :key="item.id">
+        <div>
+          <h2>Produk ID: {{ item.product_id }}</h2>
+          <p>Jumlah: {{ item.quantity }}</p>
+          <p>Harga: {{ item.price }}</p>
+        </div>
+      </li>
+    </ul>
+    <h3>Total Harga: {{ cartStore.total }}</h3>
+  </div>
+  <div v-else>
+    <p>Keranjang Anda kosong.</p>
+  </div>
+
 </template>

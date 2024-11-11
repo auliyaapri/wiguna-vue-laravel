@@ -63,7 +63,6 @@ const handleLogin = async () => {
             email: email.value,
             password: password.value,
         });
-
         console.log(response.data);
 
         if (response.data.access_token) {
@@ -75,13 +74,14 @@ const handleLogin = async () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             // Simpan data pengguna dan token ke store Pinia
             authStore.setUser({
                 id: userResponse.data.id,
                 name: userResponse.data.name,
                 email: userResponse.data.email,
                 address: userResponse.data.address,
+                no_hp: userResponse.data.no_hp,
+                zip_code: userResponse.data.zip_code,
                 role: userResponse.data.role, // Jika ada
             }, token);
             

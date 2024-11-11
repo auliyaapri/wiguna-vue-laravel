@@ -1,34 +1,25 @@
 <script setup>
 import { createApp, ref, onMounted } from "vue";
-
 import HeaderClothes from "@/components/HeaderClothes.vue";
 import axios from "axios";
-
 const getAllProducts = ref([]);
 const getAllCategories = ref([]);
-
-
 const getCategories = () => {
-
-  // Make a request for a user with a given ID
   axios.get('http://wiguns-backend.test/api/category')
     .then(function (response) {
-      getAllCategories.value = response.data.data;
-      console.log(response);
+      getAllCategories.value = response.data;
+      console.log('Kategori yang didapat:', getAllCategories.value);
     })
     .catch(function (error) {
-      // handle error
       console.log(error);
     })
     .finally(function () {
-      // always executed
     });
 
 }
 
 onMounted(() => {
   getCategories(); // Memanggil getCategories untuk mendapatkan kategori
-
   axios
     .get("http://wiguns-backend.test/api/products")
     .then((response) => {
@@ -38,21 +29,13 @@ onMounted(() => {
       console.log(error);
     });
 });
-
-
-
 const truncateDescription = (description) => {
   const maxLength = 150;
   if (description.length > maxLength) {
     return description.substring(0, maxLength) + '...';
   }
   return description;
-
-
 }
-
-//  Truncate description
-
 </script>
 
 <template>
@@ -72,29 +55,17 @@ const truncateDescription = (description) => {
 
   <div class="products">
     <div class="container">
-      <div class="row">
-        <h1>ijjoi</h1>
-        <ul>
-          <li v-for="okee in getAllCategories" :key="okee.id">dfdf</li>
-        </ul>
-      </div>
-
 
       <div class="row">
         <div class="col-md-12">
           <div class="filters">
             <ul>
               <li class="active" data-filter="*">All Products</li>
-              <li data-filter=".des">Featured</li>
-              <li data-filter=".dev">Flash Deals</li>
-              <li data-filter=".gra">Last Minute</li>
-            </ul>
-            <!-- Menampilkan kategori -->
-            <ul>
-              <li v-for="categoryItem in getAllCategories" :key="categoryItem.id">
-                <h4>{{ categoryItem.name }}</h4>
+              <li v-for="categoryItem in getAllCategories" :key="categoryItem.id" :data-filter="categoryItem.name">
+                {{ categoryItem.name }}
               </li>
             </ul>
+            
           </div>
         </div>
 
@@ -130,7 +101,6 @@ const truncateDescription = (description) => {
                         <span>Reviews (21)</span>
                       </div>
                     </div>
-
                   </div>
                 </div>
                 <!-- dd -->

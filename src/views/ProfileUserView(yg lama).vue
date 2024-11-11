@@ -6,7 +6,6 @@ import { useRoute } from 'vue-router';
 const authStore = useAuthStore(); // Inisialisasi store
 const user = ref({ ...authStore.user }); // Salin data pengguna
 const currentPath = ref('');
-const urlApiDomain = ref(authStore.urlApiDomain)
 
 // Fungsi untuk mengubah string menjadi format kapital di awal setiap kata
 const toTitleCase = (str) => {
@@ -83,15 +82,7 @@ const handleUpdate = async () => {
           </div>
           <div class="card-body">
             <form @submit.prevent = "handleUpdate">
-               <!-- Image -->
-               <div class="mb-3">
-                <label for="name" class="form-label">Image Profile</label>
-                <br>
-                <img :src="`${urlApiDomain}${user.image_profile} `" alt="vfv" class="w-25">
-                <br>
-                <br>
-                <input type="file" class="form-control" id="image_profile" placeholder="Enter your full name">
-              </div>
+              <!-- Nama -->
               <div class="mb-3">
                 <label for="name" class="form-label">Full Name</label>
                 <input type="text" class="form-control" id="name" v-model="user.name" placeholder="Enter your full name">

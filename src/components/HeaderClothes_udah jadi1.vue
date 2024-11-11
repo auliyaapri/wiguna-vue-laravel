@@ -1,6 +1,6 @@
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
@@ -14,8 +14,6 @@ const jumlahKeranjang = ref(0);
 
 const userName = authStore.user?.name;
 const user_role = authStore.user?.role;
-
-const userName2 = computed(() => authStore.user?.name);
 
 const checkInactivity = () => {
 
@@ -85,7 +83,6 @@ let intervalId;
 
 onMounted(() => {
   // notUser()
-console.log(userName2.value);
 
   if (authStore?.user) {
 

@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
+  
+
   state: () => ({
     token: localStorage.getItem('token') || null,
     user: JSON.parse(localStorage.getItem('user')) || null,
@@ -44,23 +46,23 @@ export const useAuthStore = defineStore('auth', {
         console.error('Error fetching user:', error);
       }
     },
-    async updateUser(userId, formData) {
+    async updateUser(userId, userData) {
       try {
-        const response = await axios.put(`http://wiguns-backend.test/api/users/${userId}`, formData, {
+        const response = await axios.put(`http://wiguns-backend.test/api/users/${userId}`, userData, {
           headers: {
-            Authorization: `Bearer ${this.token}`, // Sertakan token jika dibutuhkan
+            'Content-Type': 'multipart/form-data', // Pastikan header menggunakan multipart
+
+            Authorization: `Bearer ${this.token}` // Sertakan token jika dibutuhkan
           }
         });
-    
         // Memperbarui state dengan data yang diterima dari server setelah berhasil
-        this.setUser(response.data.user, this.token);
+        this.setUser(response.data.user, this.token); // Update state dengan data baru
         console.log('Profile updated successfully:', response.data);
       } catch (error) {
         console.error('Error updating profile:', error);
         // Anda bisa menambahkan penanganan error di sini
       }
     }
-    
   }
 });
 

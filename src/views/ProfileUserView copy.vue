@@ -3,10 +3,11 @@ import { useAuthStore } from '@/stores/authStore'; // Import store authStore
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-const authStore = useAuthStore(); // Inisialisasi store
+const authStore = useAuthStore(); 
+const urlApiDomain = ref(authStore.urlApiDomain)
+
 const user = ref({ ...authStore.user }); // Salin data pengguna
 const currentPath = ref('');
-const urlApiDomain = ref(authStore.urlApiDomain)
 
 // Fungsi untuk mengubah string menjadi format kapital di awal setiap kata
 const toTitleCase = (str) => {
@@ -25,12 +26,24 @@ onMounted(async () => {
   await authStore.fetchUserById(authStore.user.id); // Pastikan fungsi ini ada di store
   Object.assign(user.value, authStore.user); // Perbarui user lokal
 });
-
 const handleUpdate = async () => {
-  const userId = authStore.user.id;
-  await authStore.updateUser(userId, user.value); // Kirim data yang diperbarui
-};
+  const userId = authStore.user.id; // Ambil ID pengguna
 
+  const formData = new FormData();
+  formData.append('name', user.value.name);
+  formData.append('email', user.value.email);
+  formData.append('no_hp', user.value.no_hp);
+  formData.append('address', user.value.address);
+  formData.append('zip_code', user.value.zip_code);
+
+  // Jika ada file, tambahkan ke FormData
+  if (file.value) {
+    formData.append('image_profile', file.value);
+  }
+
+  // Panggil action untuk update profil
+  await authStore.updateUser(userId, formData);
+};
 </script>
 
 
@@ -83,8 +96,8 @@ const handleUpdate = async () => {
           </div>
           <div class="card-body">
             <form @submit.prevent = "handleUpdate">
-               <!-- Image -->
-               <div class="mb-3">
+              <!-- Image -->
+              <div class="mb-3">
                 <label for="name" class="form-label">Image Profile</label>
                 <br>
                 <img :src="`${urlApiDomain}${user.image_profile} `" alt="vfv" class="w-25">
@@ -92,6 +105,7 @@ const handleUpdate = async () => {
                 <br>
                 <input type="file" class="form-control" id="image_profile" placeholder="Enter your full name">
               </div>
+              <!-- Nama -->
               <div class="mb-3">
                 <label for="name" class="form-label">Full Name</label>
                 <input type="text" class="form-control" id="name" v-model="user.name" placeholder="Enter your full name">
@@ -146,4 +160,5 @@ const handleUpdate = async () => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
+
 

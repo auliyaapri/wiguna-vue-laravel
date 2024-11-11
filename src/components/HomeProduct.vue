@@ -14,7 +14,7 @@ onMounted(() => {
     .then((response) => {
       // handle success
       getAllProducts.value = response.data.data.data;
-      console.log(response);
+      // console.log(response);
     })
     .catch((error) => {
       console.log(error);
