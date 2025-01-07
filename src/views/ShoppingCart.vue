@@ -1,37 +1,97 @@
 <script setup>
 import router from "@/router";
 import axios from "axios";
-import { ref, onMounted, watch, toRaw } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from "@/stores/Cart";
 
-// State untuk menyimpan jumlah item dalam keranjang
-// const keranjangUser = ref([]);
-const authStore = useAuthStore(); // Inisialisasi store
-
-// ==== Untuk melihat keranjang berdasarkan token login 
+const authStore = useAuthStore();
 const cartStore = useCartStore();
+const user = ref({ ...authStore.user });
 
-const user = ref({ ...authStore.user }); // Salin data pengguna
-const totalHarga = ref(0);
-const pajak = ref(0);
+// Fungsi untuk menghapus item dari keranjang
+const removeItem = async (id) => {
+  try {
+    const response = await axios.delete(`http://wiguns-backend.test/api/carts/${id}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+      },
+    });
+    console.log("Item removed successfully:", response.data);
+  } catch (error) {
+    console.error("Error removing item:", error);
+  }
+};
 
+// Format mata uang
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value).replace('Rp', 'Rp.');
+};
 
+// Fungsi checkout
+const checkout = async () => {
+  try {
+    const transactionTotal = cartStore.total;
+
+    // Mengirim permintaan untuk membuat transaksi
+    const transactionResponse = await axios.post('http://wiguns-backend.test/api/checkout', {
+      transaction: {
+        uuid: `TRX${Date.now()}`, // UUID unik untuk transaksi
+        user_id: authStore.user.id, // ID pengguna
+        transaction_status: 'pending', // Status transaksi
+        transaction_total: transactionTotal, // Total transaksi
+      },
+      transaction_details: cartStore.items.map(item => ({
+        product_id: item.product_id, // ID produk
+        quantity: item.quantity, // Jumlah produk
+      }))
+    }, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`, // Mengirimkan Bearer Token di header
+      },
+    });
+
+    console.log("Transaction successful:", transactionResponse.data);
+
+    const paymentUrl = transactionResponse.data.paymentUrl;
+    console.log('Payment URL:', paymentUrl);
+
+    if (paymentUrl) {
+      // Redirect pengguna ke halaman pembayaran Midtrans
+      window.location.href = paymentUrl;
+    } else {
+      console.error("Tidak ada URL pembayaran yang diberikan.");
+      alert("Kesalahan: Tidak ada URL pembayaran yang diberikan.");
+    }
+
+  } catch (error) {
+    console.error("Error during checkout:", error);
+    alert("Terjadi kesalahan saat melakukan transaksi: " + error.message);
+  }
+};
 // Lifecycle hook yang dijalankan saat komponen di-mount
 onMounted(() => {
+  if (!authStore.user) {
+    router.push("/");
+  }
+  cartStore.fetchCart();
 
-  cartStore.fetchCart(); //
-
-  // Ambil data keranjang dari localStorage
-  // const storedKeranjang = localStorage.getItem("keranjangUser");
+  const script = document.createElement('script');
+  script.src = "https://app.midtrans.com/snap/snap.js";
+  script.setAttribute('data-client-key', 'SB-Mid-client-tIYEa5vhFG3DM4hE'); // Ganti dengan kunci klien Anda
+  script.async = true;
+  document.body.appendChild(script);
 });
-
 </script>
 
 <template>
-
   <div class="container my-5">
-    <nav aria-label="breadcrumb" class="">
+    <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <router-link to="/">Home</router-link>
@@ -44,146 +104,61 @@ onMounted(() => {
         </li>
       </ol>
     </nav>
-  </div>
 
-  <section class="store-cart">
-    <div class="container">
-      <!-- Table -->
-      <div class="row" data-aos="fade-up" data-aos-delay="100">
-        <div class="col-8 table-responsive">
-          <h3>User yang sekarang login <div class="text-danger"> {{ user.name }}</div>
-          </h3>
-
-          <table class="table table-bordered table-cart">
-            <thead>
-              <tr>
-                <td>Image</td>
-                <td>Name &amp; Seller</td>
-                <td>Price</td>
-                <td>Jumlah</td>
-                <td>Menu</td>
-              </tr>
-            </thead>
-
-            <tbody>
-              <div v-if="cartStore.items.length > 0">
-
-
-                <tr v-for="item in cartStore.items" :key="item.id">
-          
-                  <td style="width: 35%">
-                    <div class="product-title">{{ item.name }}</div>
-                    <div class="product-subtitle">By Andi Sukka</div>
-                  </td>
-                  <td style="width: 35%">
-                    <div class="product-title">{{ item.priceProduct }}</div>
-                    <div class="product-subtitle">USD</div>
-                  </td>
-                  <!-- <td>{{ item.quantity}}</td> -->
-                  <td>
-                    <div class="d-flex align-items-center">
-
-                      <button class="btn btn-secondary btn-sm" @click="decreaseQuantity(item.id)">-</button>
-                      <span class="pl-2 pr-2">{{ item.quantity }}</span>
-
-                      <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
-                    </div>
-                  </td>
-
-                  <td style="width: 20%">
-                    <button class="btn btn-danger" @click="removeItem(item.id)">
-                      Remove
-                    </button>
-                  </td>
+    <section class="store-cart">
+      <div class="container">
+        <div class="row" data-aos="fade-up" data-aos-delay="100">
+          <div class="col-12 table-responsive">
+            <table class="table table-bordered table-cart">
+              <thead>
+                <tr>
+                  <td>Image</td>
+                  <td>Name &amp; Seller</td>
+                  <td>Price</td>
+                  <td>Jumlah</td>
+                  <td>Aksi</td>
                 </tr>
-
-              </div>
-
-              <tr>
-                <th scope="row" colspan="2" class="text-center">
-                  Total Belanja
-                </th>
-                <td colspan="3" class="text-center"><b>{{ totalHarga }}</b></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col-4">
-          <table class="table table-bordered">
-            <tbody>
-              <tr>
-                <td>ID Transaksi</td>
-                <td>12345</td>
-              </tr>
-              <tr>
-                <td>Total Belanja</td>
-                <td>Rp. {{ (totalHarga + pajak).toLocaleString('id-ID') }}</td>
-              </tr>
-              <tr>
-                <td>Pajak</td>
-                <td>10% / Rp. {{ pajak.toLocaleString('id-ID') }}</td>
-              </tr>
-              <tr>
-                <td>Tanggal</td>
-                <td>2024-07-17</td>
-              </tr>
-              <tr>
-                <td>Status</td>
-                <td>Pending</td>
-              </tr>
-              <tr>
-                <td>Status</td>
-                <td>Pending</td>
-              </tr>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <template v-if="cartStore.items.length > 0">
+                  <tr v-for="item in cartStore.items" :key="item.id">
+                    <td>
+                      <img :src="item.product.galleries[0].photo" alt="Product Image" class="img-thumbnail"
+                        style="width: 200px; height: 150px;" />
+                    </td>
+                    <td>
+                      <div class="product-title">{{ item.product.name }}</div>
+                      <div class="product-subtitle">{{ item.product.seller }}</div>
+                    </td>
+                    <td>
+                      <div class="product-title">{{ formatCurrency(item.price) }}</div>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <button class="btn btn-secondary btn-sm" @click="decreaseQuantity(item.id)">-</button>
+                        <span class="px-2">{{ item.quantity }}</span>
+                        <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
+                      </div>
+                    </td>
+                    <td>
+                      <button class="btn btn-danger btn-sm" @click="removeItem(item.id)">Remove {{ item.id }}</button>
+                    </td>
+                  </tr>
+                </template>
+                <tr>
+                  <td colspan="4" class="text-center align-content-center">Total Harga <b>{{
+                    formatCurrency(cartStore.total) }}</b>
+                  </td>
+                  <td><button class="btn btn-success" @click="checkout()">Checkout</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Shippinf detail -->
-      <h1 class="mt-5 pt-5 mb-3">Detail Alamat</h1>
-      <form class="mb-3" @submit.prevent="checkout">
-        <div class="mb-3">
-          <label for="name" class="form-label">name</label>
-          <input type="text" class="form-control" id="name" v-model="user.name" />
-        </div>
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-            v-model="user.email" />
-        </div>
-        <div class="mb-3">
-          <label for="noHp" class="form-label">No HP</label>
-          <input type="text" class="form-control" id="noHp" v-model="user.no_hp" />
-        </div>
-        <div class="mb-3">
-          <label for="zip" class="form-label">Zip Code</label>
-          <input type="text" class="form-control" id="zip" v-model="user.zip_code" />
-        </div>
-        <div class="mb-3">
-          <label for="state" class="form-label">Alamat Lengkap</label>
-          <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"
-            v-model="user.address"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-  </section>
-
-  <div v-if="cartStore.items.length > 0">
-    <ul>
-      <li v-for="item in cartStore.items" :key="item.id">
-        <div>
-          <h2>Produk ID: {{ item.product_id }}</h2>
-          <p>Jumlah: {{ item.quantity }}</p>
-          <p>Harga: {{ item.price }}</p>
-        </div>
-      </li>
-    </ul>
-    <h3>Total Harga: {{ cartStore.total }}</h3>
+      <!-- Kontainer untuk menampilkan pop-up pembayaran -->
+      <div id="snap-container"></div>
+    </section>
   </div>
-  <div v-else>
-    <p>Keranjang Anda kosong.</p>
-  </div>
-
 </template>

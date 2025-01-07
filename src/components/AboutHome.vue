@@ -1,4 +1,39 @@
-<script>
+<script setup>
+import axios from "axios";
+import { onMounted, ref } from "vue";
+
+const dataContent = ref([]);
+const imageContent = ref([]);
+
+const fetchData = async () => {
+  try {
+    const response = await axios.get("http://wiguns-backend.test/api/pageContent");
+    const allData = response.data.data;
+
+    // Filter hanya untuk data dengan page.name = 'home'
+    const homeContent = allData.find(item => item.page.name === "home");
+
+    if (homeContent) {
+      dataContent.value = homeContent.isi_konten;
+      imageContent.value = homeContent.image;
+    } else {
+      console.error("No content found for 'home'");
+    }
+
+    console.log(homeContent); // Opsional: log untuk memeriksa data yang difilter
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+onMounted(() => {
+  // getName();
+  fetchData();
+  
+});
+
+
+
 
 </script>
 
@@ -12,22 +47,19 @@
             </div>
           </div>
           <div class="col-md-6">
-            <div class="left-content">
-              <h4>Looking for the best products?</h4>
-              <p><a rel="nofollow" href="https://templatemo.com/tm-546-sixteen-clothing" target="_parent">This template</a> is free to use for your business websites. However, you have no permission to redistribute the downloadable ZIP file on any template collection website. <a rel="nofollow" href="https://templatemo.com/contact">Contact us</a> for more info.</p>
-              <ul class="featured-list">
-                <li><a href="#">Lorem ipsum dolor sit amet</a></li>
-                <li><a href="#">Consectetur an adipisicing elit</a></li>
-                <li><a href="#">It aquecorporis nulla aspernatur</a></li>
-                <li><a href="#">Corporis, omnis doloremque</a></li>
-                <li><a href="#">Non cum id reprehenderit</a></li>
-              </ul>
-              <a href="about.html" class="filled-button">Read More</a>
+            <div class="left-content ">
+              <span>
+                {{dataContent}}  
+
+              </span>
+              <br>
+              <router-link to="/about" class="filled-button">Read More</router-link>            
             </div>
           </div>
           <div class="col-md-6">
             <div class="right-image">
-              <img src="@/assets/img/feature-image.jpg" alt="">
+              <img :src="`http://wiguns-backend.test/storage/assets/page-content/${imageContent}`" alt="">
+
             </div>
           </div>
         </div>

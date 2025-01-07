@@ -5,17 +5,18 @@ import { RouterLink, useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 import { onUnmounted } from "vue";
+import { useCartStore } from "@/stores/Cart";
 
 const authStore = useAuthStore();
 
 const currentUrl = ref();
 const router = useRouter();
-const jumlahKeranjang = ref(0);
-
+const cartStore = useCartStore();
+const totalQuantity = computed(() => cartStore.totalQuantity);
 const userName = authStore.user?.name;
 const user_role = authStore.user?.role;
-
 const userName2 = computed(() => authStore.user?.name);
+
 
 const checkInactivity = () => {
 
@@ -76,64 +77,30 @@ const handleLogout = async () => {
 // Mengatur agar ketika belum login maka, akan ke arah login
 const notUser = () => {
   if (!authStore.user) {
-    alert('tidak ada user bro')
-    
+    alert('You have to Login First!')
+    router.push('/login')
   }
 }
 
-let intervalId;
+
 
 onMounted(() => {
   // notUser()
-console.log(userName2.value);
-
-  if (authStore?.user) {
-
-  
-    const intervalId = setInterval(checkInactivity, 1000);
-
-  
-    window.addEventListener("mousemove", updateActivity);
-    window.addEventListener("click", updateActivity);
-    window.addEventListener("keydown", updateActivity);
-  }
-
-  const storedKeranjang = localStorage.getItem("keranjangUser");
-
-  console.log("adddddddddd", JSON.parse(storedKeranjang));
-
-  if (storedKeranjang) {
-    try {
-      const keranjangArray = JSON.parse(storedKeranjang);
-      jumlahKeranjang.value = keranjangArray.reduce((total, item) => {
-        return total + (item.quantity || 1);
-      }, 0);
-    } catch (error) {
-      console.error("Error parsing JSON from localStorage", error);
-    }
-  }
-  console.log("Jumlah Keranjang:", jumlahKeranjang.value);
+  console.log(userName2.value);
+  cartStore.fetchCart();
+  checkInactivity();
 });
 
-onUnmounted(() => {
-  if (intervalId) {
-    clearInterval(intervalId);
-  }
-
-  window.removeEventListener("mousemove", updateActivity);
-  window.removeEventListener("click", updateActivity);
-  window.removeEventListener("keydown", updateActivity);
-});
 </script>
 <!-- About.vue -->
 <template>
+  <Hero />
+
   <header class="fixed-top">
     <nav class="navbar navbar-expand-lg">
-      <div class="container-fluid">
+      <div class="container-fluid mx-lg-5">
         <a class="navbar-brand" href="/">
-          <!-- <h1>Welcome, {{ authStore.user?.email }}</h1> -->
-
-          <h2>Sixteen <em>Clothing</em></h2>
+          <h2>Wiguna <em>Store</em></h2>
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
           aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -153,11 +120,11 @@ onUnmounted(() => {
               <router-link to="/products" class="nav-link navLink-hover">Our Products</router-link>
             </li>
 
-            <li class="nav-item">
-              <a class="nav-link navLink-hover" href="about.html">About Us</a>
+            <li class="nav-item" :class="{ active: router.currentRoute.value.path === '/about' }">
+              <router-link to="/about" class="nav-link navLink-hover">About Us</router-link>
             </li>
-            <li class="nav-item">
-              <a class="nav-link navLink-hover" href="contact.html">Contact Us</a>
+            <li class="nav-item" :class="{ active: router.currentRoute.value.path === '/contact' }">
+              <router-link to="/contact" class="nav-link navLink-hover">Contact Us</router-link>
             </li>
 
             <li v-if="!authStore.user" class="nav-item"
@@ -191,7 +158,7 @@ onUnmounted(() => {
               <router-link class="nav-link" to="/cart">
                 <h3 class="oke">
                   <i class="bi bi-cart-plus"></i>
-                  <span class="text-warning">{{ jumlahKeranjang }}</span>
+                  <span class="text-warning">{{totalQuantity}}</span>
                 </h3>
               </router-link>
             </li>

@@ -12,7 +12,7 @@
                         </p>
                         <form @submit.prevent="handleLogin" method="post">
                             <div class="form-group first">
-                                <label for="username">Username</label>
+                                <label for="Email">Email</label>
                                 <input v-model="email" type="text" class="form-control" placeholder="your-email@gmail.com" id="username" required/>
                                 <p v-if="errorMessage.includes('Email tidak ditemukan')" class="error-message">
                                     {{ errorMessage }}

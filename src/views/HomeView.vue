@@ -10,11 +10,11 @@ import TestProps from "@/components/TestProps.vue";
 <template>
   
   <HeaderClothes />
+  
   <Hero />
   <HomeProduct/>
   
 <AboutHome/>
 <Footer/>
-<TestProps namaBro="oke bang joko"/>
   
 </template>

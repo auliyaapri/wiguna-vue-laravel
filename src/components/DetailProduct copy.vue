@@ -6,11 +6,9 @@ import axios from "axios";
 import HeaderClothes from "./HeaderClothes.vue";
 import router from "@/router";
 import { useAuthStore } from "@/stores/authStore";
+import { useCartStore } from "@/stores/Cart"; // Tambahkan ini
 
 const authStore = useAuthStore();
-
-
-
 
 
 // Mendapatkan route saat ini dan mengambil parameter `id` dari URL
@@ -18,14 +16,10 @@ const route = useRoute();
 const idProduct = route.params.id; // Mengakses parameter rute 'id' yang diterima
 const images = ref([]);
 const mainImageUrl = ref(images.value[0]);
-
 const quantity = ref(0); // Menggunakan 0 sebagai nilai awal untuk quantity
-
-const keranjangUser = ref([]);
 const productDetails = ref({});
 const activeThumbnail = ref(null); // Inisialisasi activeThumbnail dengan ref
 const jumlah = ref(1);
-const jumlahKeranjang = computed(() => keranjangUser.value.length);
 // console.log(jumlahKeranjang);
 
 
@@ -48,41 +42,75 @@ const checkQuantity = () => {
   } else if (jumlah.value < 1) {
     jumlah.value = 1
   }
+  
+
 }
 
-const saveKeranjang = (product, nameProduct, priceProduct, photoProduct, jumlahInput) => {
-  let productStored = {
-    id: product,
-    name: nameProduct,
-    quantity: jumlahInput,
-    priceProduct: priceProduct,
-    photoProduct: photoProduct,
-  };
-
-  
-  keranjangUser.value.push(productStored);
-
-  
-  localStorage.setItem("keranjangUser", JSON.stringify(keranjangUser.value));
-  
-  console.log('Product saved:', productStored);
-  console.log('All products in cart:', JSON.parse(localStorage.getItem("keranjangUser")));
-
-  // window.location.reload(); // Reload halaman jika diperlukan, tetapi sebaiknya diletakkan setelah semua logika
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  })
+    .format(price)
+    .replace('IDR', '')
+    .trim();
 };
 
+const saveKeranjang = async (product, priceProduct, jumlahInput) => {
+
+  let productStored = {
+    product_id: product,
+    quantity: jumlahInput,
+    price: priceProduct,
+  };
+  console.log('okeeeep', productStored);
+
+  try {
+    // Menggunakan await untuk memastikan data dikirim dan mendapatkan respons
+    const response = await axios.post(
+      'http://wiguns-backend.test/api/carts',
+      productStored,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authStore.token}` // Token dari Vuex atau Pinia
+        }
+      }
+    );
+
+    console.log("Response:", response.data);
+    if (response.data.status === 'success') {
+      // Mengupdate state cart di Pinia
+      const cartStore = useCartStore(); // Ambil store cart
+      cartStore.addItem({
+        id: product,
+        price: priceProduct,
+        quantity: jumlahInput
+      });
+      productDetails.value.quantity -= jumlahInput; // Update quantity produk
+    } else {
+      alert('Terjadi kesalahan saat menambahkan ke keranjang.');
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert('Terjadi kesalahan saat mengirim data.');
+  }
+};
+
+
+
+
+
 onMounted(() => {
-  
-if (!authStore.token) {
-  const okee = document.getElementById('addToCart');
-  if (okee) {
-    okee.classList.add('disabled');
+
+  if (!authStore.token) {
+    const disabledButton = document.getElementById('addToCart');
+    if (disabledButton) {
+      disabledButton.classList.add('disabled');
+    }
   }
-}
-  const storedKeranjang = localStorage.getItem("keranjangUser");
-  if (storedKeranjang) {
-    keranjangUser.value = JSON.parse(storedKeranjang);
-  }
+
   axios
     .get("http://wiguns-backend.test/api/products?id=" + idProduct)
     .then((response) => {
@@ -104,13 +132,19 @@ if (!authStore.token) {
     .catch((error) => {
       console.log(error);
     });
-});
+
+
+}); // end
+
+
 </script>
 
 <template>
+  <br>
+  <br>
+  <br>
   <HeaderClothes :jumlahKeranjang="jumlahKeranjang" />
-  <br />
-  <br />
+
 
   <div class="container my-5 mt-5">
     <nav aria-label="breadcrumb">
@@ -138,36 +172,32 @@ if (!authStore.token) {
       </div>
       <div class="col-md-5">
         <div class="d-flex justify-content-between">
-        <div class="product-title">{{ productDetails.name }}</div>
-        <div class="product-title" v-if="productDetails.category">{{ productDetails.category.name }}</div>
-      </div>
+          <div class="product-title">{{ productDetails.name }}</div>
+          <div class="product-title" v-if="productDetails.category">{{ productDetails.category.name }}</div>
+        </div>
         <!-- <div class="product-author">{{ productDetails.type }}</div> -->
         <div class="d-flex justify-content-between pt-2">
-          <div class="product-price">Rp. {{ productDetails.price }}</div>
+          <div class="product-price">{{ formatPrice(productDetails.price) }}</div>
           <div class="product-author">Stok : {{ productDetails.quantity }}</div>
         </div>
         <div class="product-description" v-html="productDetails.description"></div>
         <div class="d-flex align-items-center">
-          <div class="mt-3">
-            <!-- <input type="number" class="form-control w-75" v-model="jumlah" @input="checkQuantity" /> -->
+          <div class="mt-3">            
             <input type="number" class="form-control w-75" v-model="jumlah" @input="checkQuantity" min="1" />
 
           </div>
 
 
+          <!-- Button di template -->
           <button id="addToCart" class="btn btn-success mt-3" @click="
             saveKeranjang(
               productDetails.id,
-              productDetails.name,
               productDetails.price,
-              productDetails.galleries[0].photo,
               jumlah
             )
             ">
             Add to Cart
           </button>
-
-          <!-- <p>Jumlah yang dimasukkan: {{ jumlah }}</p> -->
         </div>
       </div>
     </div>

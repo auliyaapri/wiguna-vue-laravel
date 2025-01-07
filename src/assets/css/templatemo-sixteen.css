@@ -101,7 +101,9 @@ a.filled-button:hover {
 }
 
 .about-heading {
-	background-image: url(../images/about-heading.jpg);
+		background-image: url('@/assets/img/slide_01.jpg');
+
+	
 }
 
 .contact-heading {
@@ -501,7 +503,7 @@ header .navbar {
 }
 
 .product-item .down-content p {
-	margin-top: 50px;
+	margin-top: .5rem;
 	margin-bottom: 20px;
 }
 
@@ -663,7 +665,7 @@ footer {
 footer .inner-content {
 	border-top: 1px solid #eee;
 	margin-top: 60px;
-	padding: 60px 0px;
+	padding: 30px 0px;
 }
 
 footer .inner-content p {
@@ -706,7 +708,14 @@ footer .inner-content p a {
 .products .filters ul li:hover {
 	color: #f33f3f;
 }
+.products .filters ul li.active,
+.products .filters ul li .filter-text :hover {
+	color:#fff;
 
+}
+.filter-text {
+	color:#fff;
+}
 .products ul.pages {
 	margin-top: 30px;
 	text-align: center;

@@ -49,32 +49,6 @@ const handleUpdate = async () => {
           </ol>
         </nav>  
       </div>
-      <!-- <div class="col-md-4">
-        <div class="card">
-          <div class="card-header bg-primary text-white text-center">
-            <h2>Your Image</h2>
-          </div>
-          <div class="card-body">
-            <form>
-              
-              <div class="mb-3 text-center">
-                <span>
-                  <img
-                    src="https://cdn.leonardo.ai/users/d06c6046-418b-47da-a4e1-947ad237b38c/generations/8347244b-46ca-4f07-ac47-fe4af229ee03/Leonardo_Phoenix_A_detailed_image_capturing_the_back_of_an_AI_1.jpg?w=512"
-                    class="rounded-circle text-center" alt="" style="width: 15rem" />
-                </span>
-              </div>
-              <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" v-model="user.name" placeholder="Change Image">
-              </div>
-              <div class="text-center">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div> -->
       
       <div class="col-md-8">
         <div class="card">
@@ -85,8 +59,6 @@ const handleUpdate = async () => {
             <form @submit.prevent = "handleUpdate">
                <!-- Image -->
                <div class="mb-3">
-                <label for="name" class="form-label">Image Profile</label>
-                <br>
                 <img :src="`${urlApiDomain}${user.image_profile} `" alt="vfv" class="w-25">
                 <br>
                 <br>
@@ -96,6 +68,7 @@ const handleUpdate = async () => {
                 <label for="name" class="form-label">Full Name</label>
                 <input type="text" class="form-control" id="name" v-model="user.name" placeholder="Enter your full name">
               </div>
+              
 
               <!-- Email -->
               <div class="mb-3">
@@ -146,4 +119,3 @@ const handleUpdate = async () => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
-
