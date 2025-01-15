@@ -11,7 +11,6 @@
     const dataContent = ref([]);
     const imageContent = ref([]);
 
-
     const route = useRoute();
     let currentUrl = ref(route.fullPath);
     let NewCurrentUrl = currentUrl.value.replace('/', '');
@@ -33,8 +32,6 @@
         try {
             const response = await axios.get("http://wiguns-backend.test/api/pageContent");
             const allData = response.data.data;
-
-            // Filter hanya untuk data dengan page.name = 'about'
             const aboutContent = allData.find(item => item.page.name === "about");
 
             if (aboutContent) {
@@ -43,14 +40,13 @@
             } else {
                 console.error("No content found for 'about'");
             }
-
-            console.log(aboutContent); // Opsional: log untuk memeriksa data yang difilter
+            console.log(aboutContent);
         } catch (error) {
             console.error(error);
         }
     };
 
-    onMounted(() => {
+    onMounted(() => {        
         fetchData();
         getBanner();
     });
@@ -75,180 +71,37 @@
             </div>
         </div>
 
-        <div class="best-features about-features">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="section-heading">
-                            <h2>Our Background</h2>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="right-image">
-                            <img :src="`http://wiguns-backend.test/storage/assets/page-content/${imageContent}`" alt="">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="left-content">
-                            <h4>Who we are &amp; What we do?</h4>
-                            <p>
-                                {{ dataContent }}
-                            </p>
-                            <ul class="social-icons">
-                                <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="team-members">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="section-heading">
-                            <h2>Our Team Members</h2>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_01.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>Johnny William</h4>
-                                <span>CO-Founder</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
+        <div class="abouts">
+            <div class="best-features about-features md:py-0">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12" data-aos="fade-up" data-aos-duration="2000">
+                            <div class="section-heading">
+                                <h2>Our Background</h2>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_02.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>Karry Pitcher</h4>
-                                <span>Product Expert</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
+                        <div class="col-lg-6">
+                            <div class="right-image">
+                                <img :src="`http://wiguns-backend.test/storage/assets/page-content/${imageContent}`"
+                                    alt="" style="border-radius: 10px;" class="image-about" data-aos="fade-up" data-aos-duration="2000">
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_03.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>Michael Soft</h4>
-                                <span>Chief Marketing</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_04.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>Mary Cool</h4>
-                                <span>Product Specialist</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_05.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>George Walker</h4>
-                                <span>Product Photographer</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="team-member">
-                            <div class="thumb-container">
-                                <img src="@/assets/img/team_06.jpg" alt="">
-                                <div class="hover-effect">
-                                    <div class="hover-content">
-                                        <ul class="social-icons">
-                                            <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
-                                            <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="down-content">
-                                <h4>Kate Town</h4>
-                                <span>General Manager</span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing itaque corporis nulla.</p>
+                        <div class="col-lg-6 mt-md-3 mt-lg-0">
+                            <div class="left-content">
+                                <h4 class="fs-5" data-aos="fade-up" data-aos-duration="2000">Who we are &amp; What we do?</h4>
+                                <div data-aos="fade-right" data-aos-duration="2000" v-html="dataContent"></div>
+                                <ul class="social-icons">
+                                    <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
+                                    <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
+                                    <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+
 </template>

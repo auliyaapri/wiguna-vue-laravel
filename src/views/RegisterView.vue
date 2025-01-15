@@ -18,6 +18,8 @@ const errorMessage = ref("");
 const baseUrl = ref("");
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia store
+const contentLogin = ref("");
+const titleLogin = ref("");
 
 const handleRegister = async () => {
     try {
@@ -60,6 +62,10 @@ onMounted(() => {
             baseUrl.value = `${url.protocol}//${url.host}/`;
             const loginImages = response.data.data;
 
+            contentLogin.value = response.data.data[0].description;
+            
+            titleLogin.value = response.data.data[0].name_page_image;
+            console.log(titleLogin.value); // Login To Wiguna Store
             if (response.data.status === "success" && loginImages.length > 0) {
                 const mediaContent = loginImages[0].media_content;
                 console.log("Media Content:", mediaContent);
@@ -85,11 +91,11 @@ onMounted(() => {
         <div class="contents order-2 order-md-1">
             <div class="container">
                 <div class="row align-items-center justify-content-center">
-                    <div class="col-md-7">
-                        <h3>Register to <strong>Colorlib</strong></h3>
+                    <div class="col-12 col-lg-7 register_container pt-3 lg:pt-0">
+
+                        <h3 class="mb-3">{{ titleLogin.replace("Login To ", "Register To ") }}</h3>
                         <p class="mb-4">
-                            Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur
-                            adipisicing.
+                            {{ contentLogin }}
                         </p>
                         <form @submit.prevent="handleRegister">
                             <div class="row">
@@ -154,6 +160,8 @@ onMounted(() => {
                                 Register
                             </button>
                         </form>
+                        <br>
+                        <router-link to="/login"> Already have an account? Login now!</router-link>
                         <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
                     </div>
                 </div>

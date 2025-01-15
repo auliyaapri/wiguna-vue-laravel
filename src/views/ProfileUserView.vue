@@ -1,121 +1,184 @@
 <script setup>
-import { useAuthStore } from '@/stores/authStore'; // Import store authStore
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useAuthStore } from '../stores/authStore';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
-const authStore = useAuthStore(); // Inisialisasi store
-const user = ref({ ...authStore.user }); // Salin data pengguna
-const currentPath = ref('');
-const urlApiDomain = ref(authStore.urlApiDomain)
+const authStore = useAuthStore();
+const getImageUser = ref('');
 
-// Fungsi untuk mengubah string menjadi format kapital di awal setiap kata
-const toTitleCase = (str) => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
-
-onMounted(async () => {
-  const route = useRoute();
-  currentPath.value = toTitleCase(route.path.replace(/[-_]/g, ' ').replace(/\//g, '')); // Ubah "profileuser" menjadi "Profile User"
-
-  // Ambil data pengguna berdasarkan ID
-  await authStore.fetchUserById(authStore.user.id); // Pastikan fungsi ini ada di store
-  Object.assign(user.value, authStore.user); // Perbarui user lokal
+const penampungData = ref({
+  name: '',
+  email: '',
+  no_hp: '',
+  zip_code: '',
+  address: '',
+  image_profile: null,
 });
 
-const handleUpdate = async () => {
-  const userId = authStore.user.id;
-  await authStore.updateUser(userId, user.value); // Kirim data yang diperbarui
+const imagePreview = ref(null);
+const base64Image = ref('');
+// Fungsi untuk mengambil data user
+const getUserData = async () => {
+  try {
+    const response = await axios.get(`http://wiguns-backend.test/api/users/${authStore.user.id}`);
+    const userData = response.data.data;
+
+    // Update formData dengan data dari server
+    penampungData.value = {
+      name: userData.name,
+      email: userData.email,
+      no_hp: userData.no_hp,
+      zip_code: userData.zip_code,
+      address: userData.address,
+      image_profile: userData.image_profile,
+    };
+
+    getImageUser.value = userData.image_profile;
+
+  } catch (error) {
+    alert('Gagal mengambil data user');
+  }
 };
 
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    penampungData.value.path_gambar = file;
+
+    // Membaca file gambar dan mengubahnya menjadi base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      base64Image.value = reader.result;  // Menyimpan gambar sebagai base64 string
+      imagePreview.value = URL.createObjectURL(file);  // Untuk menampilkan preview
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// Fungsi untuk update profile
+// const handleSubmit = async () => {
+//   const dataToSend = {
+//     name: penampungData.value.name,
+//     email: penampungData.value.email,
+//     no_hp: penampungData.value.no_hp,
+//     zip_code: penampungData.value.zip_code,
+//     address: penampungData.value.address,
+//     image_profile: base64Image.value,
+//   };
+
+//   try {
+//     await axios.put(
+//       `http://wiguns-backend.test/api/users/update/${authStore.user.id}`, dataToSend
+//     );
+//     console.log('Response:', response.data);
+//     alert('Profile berhasil diupdate!');
+//   } catch (error) {
+      
+//   }
+// };
+const handleSubmit = async () => {
+  const dataToSend = {
+    name: penampungData.value.name,
+    email: penampungData.value.email,
+    no_hp: penampungData.value.no_hp,
+    zip_code: penampungData.value.zip_code,
+    address: penampungData.value.address,
+    image_profile: base64Image.value,
+  };
+
+  try {
+    // Tangkap response dari API
+    const response = await axios.put(
+      `http://wiguns-backend.test/api/users/update/${authStore.user.id}`,
+      dataToSend
+    );
+
+    // Periksa status respons untuk memastikan sukses
+    if (response.status === 200 || response.status === 201) {
+      alert('Profile berhasil diupdate!');
+    } else {
+      alert(`Terjadi kesalahan: ${response.status}`);
+    }
+  } catch (error) {
+    // Tampilkan pesan error lebih spesifik
+    console.error('Error:', error);
+    alert('Gagal mengupdate profile. Periksa koneksi atau coba lagi nanti.');
+  }
+};
+
+// Panggil getUserData saat komponen dimount
+onMounted(() => {
+  getUserData();
+});
 </script>
 
-
 <template>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-12">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item"><router-link to="/">Home</router-link></li>
-            <li class="breadcrumb-item activeBre" aria-current="page">
-              <router-link to="/profileUser">
-                <span style="color: gray">Profile User</span>
-              </router-link>
-            </li>            
-          </ol>
-        </nav>  
-      </div>
-      
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header bg-primary text-white text-center">
-            <h2>Edit Profile</h2>
+  <div class="profile-container">
+
+    <div class="container">
+      <!-- <h1>Edit Profile</h1> -->
+      <form @submit.prevent="handleSubmit" class="profile-form">
+
+        <!-- <div class="form-group">
+          <label for="image_profile">Path Gambar:</label>
+          <input type="file" id="image_profile" class="form-control" @change="handleFileChange" />
+
+          Menampilkan preview gambar
+          <div v-if="imagePreview" class="mt-2">
+            <img :src="imagePreview" alt="Preview Gambar" class="img-thumbnail" width="200" />
           </div>
-          <div class="card-body">
-            <form @submit.prevent = "handleUpdate">
-               <!-- Image -->
-               <div class="mb-3">
-                <img :src="`${urlApiDomain}${user.image_profile} `" alt="vfv" class="w-25">
-                <br>
-                <br>
-                <input type="file" class="form-control" id="image_profile" placeholder="Enter your full name">
-              </div>
-              <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" v-model="user.name" placeholder="Enter your full name">
-              </div>
-              
 
-              <!-- Email -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" v-model="user.email" placeholder="Enter your email" disabled>
-              </div>
-              <!-- NO HP -->
-              <div class="mb-3">
-                <label for="no_hp" class="form-label">no_hp</label>
-                <input type="text" class="form-control" id="no_hp" v-model="user.no_hp" placeholder="Enter your phone number">
-              </div>
-              
-              <!-- zip -->
-              <div class="mb-3">
-                <label for="zip_code" class="form-label">Zip Code</label>
-                <input type="text" class="form-control" id="zip_code" v-model="user.zip_code" placeholder="Enter your Zip Code">
-              </div>
+          <img :src='`http://wiguns-backend.test/storage/profile_image/${getImageUser}`' alt="dsdsds"
+            class="rounded-circle image_profile_edit">
+        </div> -->
 
-              <!-- Email -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" v-model="user.email" placeholder="Enter your email" disabled>
-              </div>
-
-              <!-- Alamat -->
-              <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" v-model="user.address" rows="3"
-                  placeholder="Enter your address"></textarea>
-              </div>
-
-              
-              <!-- Button untuk Submit -->
-              <div class="text-center">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+        <div class="form-group">
+  <label for="image_profile">Path Gambar:</label>
+  <input type="file" id="image_profile" class="form-control" @change="handleFileChange" />
+  
+  <!-- Menampilkan preview gambar jika ada -->
+  <div class="mt-2">
+    <img
+      :src="imagePreview || `http://wiguns-backend.test/storage/profile_image/${getImageUser}`"
+      alt="Preview Gambar"
+      class="img-thumbnail rounded-circle image_profile_edit"
+      width="200"
+    />
   </div>
+</div>
+
+        <div class="form-group">
+          <label>Nama:</label>
+          <input type="text" v-model="penampungData.name" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" v-model="penampungData.email" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>No HP:</label>
+          <input type="text" v-model="penampungData.no_hp" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Kode Pos:</label>
+          <input type="text" v-model="penampungData.zip_code" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Alamat:</label>
+          <textarea v-model="penampungData.address" required class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+      </form>
+    </div>
+
+
+  </div>
+
 </template>
 
-<style scoped>
-/* Custom styles (optional) */
-.card {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-</style>
+
+<style></style>

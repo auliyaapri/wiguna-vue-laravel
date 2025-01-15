@@ -12,12 +12,12 @@ const authStore = useAuthStore();
 
 // Mendapatkan route saat ini dan mengambil parameter `id` dari URL
 const route = useRoute();
-const idProduct = route.params.id; // Mengakses parameter rute 'id' yang diterima
+const idProduct = route.params.id;
 const images = ref([]);
 const mainImageUrl = ref(images.value[0]);
-const quantity = ref(0); // Menggunakan 0 sebagai nilai awal untuk quantity
+const quantity = ref(0);
 const productDetails = ref({});
-const activeThumbnail = ref(null); // Inisialisasi activeThumbnail dengan ref
+const activeThumbnail = ref(null);
 const jumlah = ref(1);
 // console.log(jumlahKeranjang);
 
@@ -26,7 +26,7 @@ const jumlah = ref(1);
 // Fungsi untuk mengubah URL gambar utama dan thumbnail yang aktif
 const changeMainImage = (url) => {
   mainImageUrl.value = url;
-  activeThumbnail.value = url; // Set thumbnail aktif
+  activeThumbnail.value = url;
   console.log("+++++++++++++++++++++++");
 
   console.log(activeThumbnail);
@@ -34,10 +34,10 @@ const changeMainImage = (url) => {
 
 const checkQuantity = () => {
   const inputRealtime = jumlah.value;
-  console.log(`Jumlah yang diinput:`, inputRealtime); // Menampilkan nilai secara real-time
+  console.log(`Jumlah yang diinput:`, inputRealtime);
 
   if (jumlah.value > quantity.value) {
-    jumlah.value = quantity.value; // Batasi input agar tidak lebih dari stok    
+    jumlah.value = quantity.value;
   } else if (jumlah.value < 1) {
     jumlah.value = 1
   }
@@ -66,14 +66,14 @@ const saveKeranjang = async (product, priceProduct, jumlahInput) => {
   console.log('okeeeep', productStored);
 
   try {
-    // Menggunakan await untuk memastikan data dikirim dan mendapatkan respons
+   
     const response = await axios.post(
       'http://wiguns-backend.test/api/carts',
       productStored,
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authStore.token}` // Token dari Vuex atau Pinia
+          'Authorization': `Bearer ${authStore.token}`
         }
       }
     );
@@ -81,8 +81,8 @@ const saveKeranjang = async (product, priceProduct, jumlahInput) => {
 
     console.log("Response:", response.data);
     if (response.data.status === 'success') {
-      // alert('Response sukses');
       productDetails.value.quantity -= jumlahInput;
+      alert('Berhasil menambahkan ke keranjang');
     } else {
       alert('Terjadi kesalahan saat menambahkan ke keranjang.');
     }
@@ -94,6 +94,26 @@ const saveKeranjang = async (product, priceProduct, jumlahInput) => {
   }
 };
 
+// const urlStorage = (urlStorage) => {
+//     if (urlStorage.includes('/storage/')) {
+//         return urlStorage.replace('/storage/', '/storage/assets/product/');
+//       }
+//       return urlStorage;
+// }
+
+
+const urlStorage = (urlStorage) => {
+  // Pastikan nilai bukan undefined atau null
+  if (!urlStorage) return ''; 
+
+  // Lakukan replace hanya jika '/storage/' ditemukan dalam string
+  if (urlStorage.includes('/storage/')) {
+    return urlStorage.replace('/storage/', '/storage/assets/product/');
+  }
+
+  // Kembalikan URL asli jika tidak ada perubahan
+  return urlStorage;
+};
 
 
 
@@ -156,12 +176,13 @@ onMounted(() => {
       </ol>
     </nav>
 
+    <p>{{ urlStorage(mainImageUrl) }}</p>
     <div class="row">
       <div class="col-md-7">
-        <img :src="mainImageUrl" class="img-fluid mb-3" alt="Product Image" />
+        <img :src="urlStorage(mainImageUrl)" class="img-fluid mb-3 rounded-5" alt="Product Image" />
         <div class="row thumbnail-images">
           <div v-for="(image, index) in images" :key="index" class="col-3" @click="changeMainImage(image)">
-            <img :src="image" class="img-thumbnail" :class="{ active: activeThumbnail === image }"
+            <img :src="urlStorage(image)" class="img-thumbnail rounded-2" :class="{ active: activeThumbnail === image }"
               :alt="'Thumbnail ' + (index + 1)" />
           </div>
         </div>
@@ -195,31 +216,6 @@ onMounted(() => {
             Add to Cart
           </button>
         </div>
-      </div>
-    </div>
-
-    <div class="review-title">Customer Review (3)</div>
-    <div class="review">
-      <div class="review-author">Hazza Risky</div>
-      <div class="review-content">
-        I thought it was not good for living room. I really happy to decided buy
-        this product last week now feels like homey.
-      </div>
-    </div>
-    <div class="review">
-      <div class="review-author">Anna Sukkirata</div>
-      <div class="review-content">
-        Color is great with the minimalist concept. Even I thought it was made
-        by Cactus industry. I do really satisfied with this.
-      </div>
-    </div>
-    <div class="review">
-      <div class="review-author">Dakimdsadu Wangi</div>
-      <div class="review-content">
-        When I saw at first, it was really awesome to have with. Just let me
-        know if there is another upcoming product like this. Lorem ipsum dolor
-        sit amet consectetur, adipisicing elit. Alias natus placeat incidunt
-        rerum quae voluptas neque laboriosam libero sequi officia?
       </div>
     </div>
   </div>

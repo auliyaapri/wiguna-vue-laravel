@@ -6,43 +6,27 @@ import axios from "axios";
 import HeaderClothes from "./HeaderClothes.vue";
 import router from "@/router";
 import { useAuthStore } from "@/stores/authStore";
-import { useCounterStore } from "@/stores/counter";
 
 const authStore = useAuthStore();
 
+
 // Mendapatkan route saat ini dan mengambil parameter `id` dari URL
 const route = useRoute();
-const idProduct = route.params.id; // Mengakses parameter rute 'id' yang diterima
+const idProduct = route.params.id;
 const images = ref([]);
 const mainImageUrl = ref(images.value[0]);
-
-
-const keranjangUser = ref([]);
-const productDetails = ref({});
-const activeThumbnail = ref(null); // Inisialisasi activeThumbnail dengan ref
-
-// === Function Cart ===
-const cartStore = useCounterStore();
-const jumlah = ref(1);
 const quantity = ref(0);
-const saveKeranjang = () => {
-    let productStored = {
-        id: productDetails.value.id,
-        name: productDetails.value.name,
-        quantity: jumlah.value,
-        priceProduct: productDetails.value.price,
-        photoProduct: productDetails.value.galleries[0].photo,
-    };
-    cartStore.addCart(productStored); // Pastikan Anda memanggil method yang benar
-};
+const productDetails = ref({});
+const activeThumbnail = ref(null);
+const jumlah = ref(1);
+// console.log(jumlahKeranjang);
 
-// END Function Cart 
 
 
 // Fungsi untuk mengubah URL gambar utama dan thumbnail yang aktif
 const changeMainImage = (url) => {
   mainImageUrl.value = url;
-  activeThumbnail.value = url; // Set thumbnail aktif
+  activeThumbnail.value = url;
   console.log("+++++++++++++++++++++++");
 
   console.log(activeThumbnail);
@@ -50,24 +34,76 @@ const changeMainImage = (url) => {
 
 const checkQuantity = () => {
   const inputRealtime = jumlah.value;
-  console.log(`Jumlah yang diinput:`, inputRealtime); // Menampilkan nilai secara real-time
+  console.log(`Jumlah yang diinput:`, inputRealtime);
 
   if (jumlah.value > quantity.value) {
-    jumlah.value = quantity.value; // Batasi input agar tidak lebih dari stok
+    jumlah.value = quantity.value;
   } else if (jumlah.value < 1) {
-    jumlah.value = 1;
+    jumlah.value = 1
+  }
+  
+
+}
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  })
+    .format(price)
+    .replace('IDR', '')
+    .trim();
+};
+
+const saveKeranjang = async (product, priceProduct, jumlahInput) => {
+
+  let productStored = {
+    product_id: product,
+    quantity: jumlahInput,
+    price: priceProduct,
+  };
+  console.log('okeeeep', productStored);
+
+  try {
+   
+    const response = await axios.post(
+      'http://wiguns-backend.test/api/carts',
+      productStored,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authStore.token}`
+        }
+      }
+    );
+
+
+    console.log("Response:", response.data);
+    if (response.data.status === 'success') {
+      productDetails.value.quantity -= jumlahInput;
+      alert('Berhasil menambahkan ke keranjang');
+    } else {
+      alert('Terjadi kesalahan saat menambahkan ke keranjang.');
+    }
+    window.location.reload();
+
+  } catch (error) {
+    console.error("Error:", error);
+    alert('Terjadi kesalahan saat mengirim data.');
   }
 };
 
 
 
+
+
 onMounted(() => {
-  cartStore.loadCart(); // Muat keranjang saat komponen dimuat
 
   if (!authStore.token) {
-    const okee = document.getElementById("addToCart");
-    if (okee) {
-      okee.classList.add("disabled");
+    const disabledButton = document.getElementById('addToCart');
+    if (disabledButton) {
+      disabledButton.classList.add('disabled');
     }
   }
 
@@ -92,13 +128,19 @@ onMounted(() => {
     .catch((error) => {
       console.log(error);
     });
-});
+
+
+}); // end
+
+
 </script>
 
 <template>
+  <br>
+  <br>
+  <br>
   <HeaderClothes :jumlahKeranjang="jumlahKeranjang" />
-  <br />
-  <br />
+
 
   <div class="container my-5 mt-5">
     <nav aria-label="breadcrumb">
@@ -127,35 +169,31 @@ onMounted(() => {
       <div class="col-md-5">
         <div class="d-flex justify-content-between">
           <div class="product-title">{{ productDetails.name }}</div>
-          <div class="product-title" v-if="productDetails.category">
-            {{ productDetails.category.name }}
-          </div>
+          <div class="product-title" v-if="productDetails.category">{{ productDetails.category.name }}</div>
         </div>
         <!-- <div class="product-author">{{ productDetails.type }}</div> -->
         <div class="d-flex justify-content-between pt-2">
-          <div class="product-price">Rp. {{ productDetails.price }}</div>
+          <div class="product-price">{{ formatPrice(productDetails.price) }}</div>
           <div class="product-author">Stok : {{ productDetails.quantity }}</div>
         </div>
         <div class="product-description" v-html="productDetails.description"></div>
         <div class="d-flex align-items-center">
-          <div class="mt-3">
-            <!-- <input type="number" class="form-control w-75" v-model="jumlah" @input="checkQuantity" /> -->
+          <div class="mt-3">            
             <input type="number" class="form-control w-75" v-model="jumlah" @input="checkQuantity" min="1" />
+
           </div>
 
+
+          <!-- Button di template -->
           <button id="addToCart" class="btn btn-success mt-3" @click="
             saveKeranjang(
               productDetails.id,
-              productDetails.name,
               productDetails.price,
-              productDetails.galleries[0].photo,
               jumlah
             )
             ">
             Add to Cart
           </button>
-
-          <!-- <p>Jumlah yang dimasukkan: {{ jumlah }}</p> -->
         </div>
       </div>
     </div>

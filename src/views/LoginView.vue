@@ -4,11 +4,10 @@
         <div class="contents order-2 order-md-1">
             <div class="container">
                 <div class="row align-items-center justify-content-center">
-                    <div class="col-md-7">
-                        <h3>Login to <strong>Colorlib</strong></h3>
+                    <div class="col-12 col-lg-7 login_container pt-5 lg:py-0">
+                        <h3 class="mb-3">{{ titleLogin }}</h3>
                         <p class="mb-4">
-                            Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur
-                            adipisicing.
+                            {{ contentLogin }}
                         </p>
                         <form @submit.prevent="handleLogin" method="post">
                             <div class="form-group first">
@@ -25,10 +24,9 @@
                             <p v-if="errorMessage.includes('Password salah.')" class="error-message">
                                 {{ errorMessage }}
                             </p>
-
-                            <router-link to="/register"> Belum punya akun ? Daftar sekarang!</router-link>
+                            <router-link to="/register"> Don't have an account? Register now!</router-link>
                             <button type="submit" class="mt-2 btn btn-block btn-primary">
-                                Login Bre
+                                Login
                             </button>
                         </form>
                     </div>
@@ -43,18 +41,20 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import "../assets/css/auth/login.css";
-
 // Import Pinia Store
 import { useAuthStore } from "@/stores/authStore";
 
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
+
 const baseUrl = ref("");
+const contentLogin = ref("");
+const titleLogin = ref("");
+
 const setCobaAja = ref(''); // Deklarasikan setCobaAja dengan benar
 const router = useRouter();
 const authStore = useAuthStore(); // Pinia store
-
 
 const handleLogin = async () => {
     try {
@@ -64,10 +64,10 @@ const handleLogin = async () => {
             password: password.value,
         });
         console.log(response.data);
+        
 
         if (response.data.access_token) {
-            const token = response.data.access_token;
-
+            const token = response.data.access_token;          
             // Ambil data pengguna dengan token yang didapat
             const userResponse = await axios.get("http://wiguns-backend.test/api/user", {
                 headers: {
@@ -84,11 +84,8 @@ const handleLogin = async () => {
                 zip_code: userResponse.data.zip_code,
                 role: userResponse.data.role, // Jika ada
             }, token);
-            
-            setCobaAja.value = 'ini coba'; // Atur nilai setCobaAja dengan benar
+            setCobaAja.value = 'ini coba';
         }
-
-        // Redirect setelah login berhasil ke halaman about
         router.push("/");
     } catch (error) {
         errorMessage.value = error.response?.data?.message || "Login failed."; // Tampilkan pesan kesalahan
@@ -96,16 +93,17 @@ const handleLogin = async () => {
     }
 };
 
-
-
 onMounted(() => {
     axios
         .get("http://wiguns-backend.test/api/login-images")
         .then((response) => {
+            // console.log(response.data.data);
             const url = new URL(response.config.url);
             baseUrl.value = `${url.protocol}//${url.host}/`;
-            const loginImages = response.data.data;
-
+            const loginImages = response.data.data;            
+            // ambil data description dari api
+            contentLogin.value = response.data.data[0].description;            
+            titleLogin.value = response.data.data[0].name_page_image;
             if (response.data.status === "success" && loginImages.length > 0) {
                 const mediaContent = loginImages[0].media_content;
                 console.log("Media Content:", mediaContent);
@@ -121,6 +119,7 @@ onMounted(() => {
             );
         });
 });
+
 </script>
 
 <style>

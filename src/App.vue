@@ -16,7 +16,7 @@ import { RouterView, useRoute } from 'vue-router';
 @import '/src/assets/css/ckeditor.css';
 @import '/src/assets/css/templatemo-sixteen.css';
 @import '/src/assets/css/style.css';
-
+@import 'https://unpkg.com/aos@next/dist/aos.css';
 /* Optional: Import external CSS */
 @import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');

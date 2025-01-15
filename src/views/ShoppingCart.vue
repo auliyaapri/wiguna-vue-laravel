@@ -1,6 +1,8 @@
 <script setup>
 import router from "@/router";
 import axios from "axios";
+import { RouterLink, useRouter } from "vue-router";
+
 import { ref, onMounted } from "vue";
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from "@/stores/Cart";
@@ -8,6 +10,9 @@ import { useCartStore } from "@/stores/Cart";
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const user = ref({ ...authStore.user });
+
+console.log(authStore.user.address);  // Jika 'name' ada dalam objek user
+
 
 // Fungsi untuk menghapus item dari keranjang
 const removeItem = async (id) => {
@@ -41,18 +46,18 @@ const checkout = async () => {
     // Mengirim permintaan untuk membuat transaksi
     const transactionResponse = await axios.post('http://wiguns-backend.test/api/checkout', {
       transaction: {
-        uuid: `TRX${Date.now()}`, // UUID unik untuk transaksi
-        user_id: authStore.user.id, // ID pengguna
-        transaction_status: 'pending', // Status transaksi
-        transaction_total: transactionTotal, // Total transaksi
+        uuid: `TRX${Date.now()}`,
+        user_id: authStore.user.id,
+        transaction_status: 'pending',
+        transaction_total: transactionTotal,
       },
       transaction_details: cartStore.items.map(item => ({
-        product_id: item.product_id, // ID produk
-        quantity: item.quantity, // Jumlah produk
+        product_id: item.product_id,
+        quantity: item.quantity,
       }))
     }, {
       headers: {
-        Authorization: `Bearer ${authStore.token}`, // Mengirimkan Bearer Token di header
+        Authorization: `Bearer ${authStore.token}`,
       },
     });
 
@@ -62,7 +67,7 @@ const checkout = async () => {
     console.log('Payment URL:', paymentUrl);
 
     if (paymentUrl) {
-      // Redirect pengguna ke halaman pembayaran Midtrans
+     
       window.location.href = paymentUrl;
     } else {
       console.error("Tidak ada URL pembayaran yang diberikan.");
@@ -83,7 +88,7 @@ onMounted(() => {
 
   const script = document.createElement('script');
   script.src = "https://app.midtrans.com/snap/snap.js";
-  script.setAttribute('data-client-key', 'SB-Mid-client-tIYEa5vhFG3DM4hE'); // Ganti dengan kunci klien Anda
+  script.setAttribute('data-client-key', 'SB-Mid-client-tIYEa5vhFG3DM4hE');
   script.async = true;
   document.body.appendChild(script);
 });
@@ -149,16 +154,60 @@ onMounted(() => {
                   <td colspan="4" class="text-center align-content-center">Total Harga <b>{{
                     formatCurrency(cartStore.total) }}</b>
                   </td>
-                  <td><button class="btn btn-success" @click="checkout()">Checkout</button></td>
+                  <td v-if="authStore.user.address == null">
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">Checkout</button>
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="text-dark">Alamat belum diisi, silahkan pergi ke halaman 
+                              <a @click="goToProfile" href="#" class="text-primary">Profile User</a> 
+                              untuk isi alamat pengiriman anda!</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td v-else>
+                    <button class="btn btn-success" @click="checkout()">Checkout</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
-
-      <!-- Kontainer untuk menampilkan pop-up pembayaran -->
       <div id="snap-container"></div>
     </section>
   </div>
 </template>
+
+<script>
+export default {
+  methods: {
+    goToProfile() {
+      // Tutup modal
+      const modal = document.querySelector('.modal');
+      const modalBackdrop = document.querySelector('.modal-backdrop');
+      
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+      }
+      if (modalBackdrop) {
+        modalBackdrop.remove();
+      }
+
+      // Navigasi ke halaman profile
+      this.$router.push('/profileUser');
+    }
+  }
+}
+</script>
