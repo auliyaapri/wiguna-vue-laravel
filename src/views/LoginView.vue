@@ -43,6 +43,7 @@ import axios from "axios";
 import "../assets/css/auth/login.css";
 // Import Pinia Store
 import { useAuthStore } from "@/stores/authStore";
+import Swal from "sweetalert2";
 
 const email = ref("");
 const password = ref("");
@@ -65,7 +66,15 @@ const handleLogin = async () => {
         });
         console.log(response.data);
         
+        Swal.fire({
+            title: "Login Success",
+            text: "You will be redirected to the homepage.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 2500,
+        });
 
+        // router.push("/");
         if (response.data.access_token) {
             const token = response.data.access_token;          
             // Ambil data pengguna dengan token yang didapat
@@ -85,8 +94,9 @@ const handleLogin = async () => {
                 role: userResponse.data.role, // Jika ada
             }, token);
             setCobaAja.value = 'ini coba';
+        window.location.href = "/";
+
         }
-        router.push("/");
     } catch (error) {
         errorMessage.value = error.response?.data?.message || "Login failed."; // Tampilkan pesan kesalahan
         console.error("Login Error:", error); 

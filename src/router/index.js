@@ -64,7 +64,7 @@ const router = createRouter({
       component: ProfileUserView,
       meta: { title: "Profile User" }, // Title untuk rute ini
     },
-    
+
     {
       path: "/bre",
       name: "bre",
@@ -82,11 +82,13 @@ const router = createRouter({
       path: "/cart",
       name: "cart",
       component: ShoppingCart,
+      meta: { title: "Cart" },
     },
     {
       path: "/success",
       name: "success",
       component: SuccessView,
+      meta: { title: "Success" },
     },
   ],
 });

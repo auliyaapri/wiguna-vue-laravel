@@ -7,15 +7,22 @@ const currentUrl = ref("");
 const getAllProducts = ref([]);
 
 
+const urlStorage = (url) => {
+    if (url.includes('/storage/')) {
+        return url.replace('/storage/', '/storage/assets/product/');
+      }
+      return url;
+}
 
 onMounted(() => {
   currentUrl.value = window.location.href;
   axios
-    .get("http://wiguns-backend.test/api/products")
+    axios.get("http://wiguns-backend.test/api/productsHome")
     .then((response) => {
-      // handle success
-      getAllProducts.value = response.data.data.data;
-      // console.log(response);
+      getAllProducts.value = response.data.data;
+      console.log(response);
+
+      console.log(getAllProducts.value);
     })
     .catch((error) => {
       console.log(error);
@@ -47,17 +54,21 @@ const formatPrice = (price) => {
             <router-link to="/products">view all products <i class="fa fa-angle-right"></i></router-link>
           </div>
         </div>
+<!-- 
+        <div class="mt3">
+          <div v-for="oe in getAllProducts" :key="oe.id">
+            <h1>{{ oe.name }}</h1>
+
+          </div>
+          
+        </div> -->
+
+
         <div class="mt-3 md:mt-0 col-12 col-lg-4 col-md-6 item" v-for="product in getAllProducts" :key="product.id">
           <div class="card h-100 shadow-sm rounded-5">
-            <!-- Image Section -->
-            <img :src="product.galleries[0].photo" alt="Image Product" class="card-img-top rounded-top-5 img-fluid" data-aos="flip-up" />
-
-            <!-- Card Body -->
+            <img :src="urlStorage(product.galleries[0].photo)" alt="Image Product" class="card-img-top rounded-top-5 img-fluid" data-aos="flip-up" />
             <div class="card-body d-flex flex-column justify-content-between">
-              <!-- Product Name -->
               <h5 class="card-title font-bold text-truncate">{{ product.name }}</h5>
-
-              <!-- Price and Category Icons -->
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="text-primary">{{ formatPrice(product.price) }}</h6>
                 <span>
@@ -66,19 +77,13 @@ const formatPrice = (price) => {
                   <i class="fas fa-baby text-secondary" v-if="product.category.name === 'Bayi'"></i>
                 </span>
               </div>
-
-              <!-- Description -->
               <p v-html="truncateDescription(product.description)" class="mb-2"></p>
-
-              <!-- Button -->
               <router-link :to="`/detail/${product.id}`" class="mt-auto">
                 <button class="btn btn-danger w-100">Buy</button>
               </router-link>
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   </div>

@@ -14,7 +14,6 @@ const user = ref({ ...authStore.user });
 console.log(authStore.user.address);  // Jika 'name' ada dalam objek user
 
 
-// Fungsi untuk menghapus item dari keranjang
 const removeItem = async (id) => {
   try {
     const response = await axios.delete(`http://wiguns-backend.test/api/carts/${id}`, {
@@ -51,6 +50,7 @@ const checkout = async () => {
         transaction_status: 'pending',
         transaction_total: transactionTotal,
       },
+
       transaction_details: cartStore.items.map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
@@ -61,13 +61,18 @@ const checkout = async () => {
       },
     });
 
-    console.log("Transaction successful:", transactionResponse.data);
+
+    // console.log("Transaction successful:", transactionResponse.data.datdsdsddsdsda);
+    // console.log("Transaction successful:", transactionResponse.data.user);
+    // console.log("Transaction successful:", transactionResponse.data.data2);
+    // console.log("ini untuk product :", transactionResponse.data.itemDetails);
+
+    // console.log("ini untuk product :", transactionResponse.data.firstName);
+    // console.log("ini untuk product :", transactionResponse.data.lastName);
 
     const paymentUrl = transactionResponse.data.paymentUrl;
-    console.log('Payment URL:', paymentUrl);
-
     if (paymentUrl) {
-     
+
       window.location.href = paymentUrl;
     } else {
       console.error("Tidak ada URL pembayaran yang diberikan.");
@@ -79,7 +84,72 @@ const checkout = async () => {
     alert("Terjadi kesalahan saat melakukan transaksi: " + error.message);
   }
 };
-// Lifecycle hook yang dijalankan saat komponen di-mount
+
+const urlStorage = (url) => {
+  if (url.includes('/storage/')) {
+    return url.replace('/storage/', '/storage/assets/product/');
+  }
+  return url;
+}
+
+const increaseQuantity = async (id) => {
+  // Mengambil data item untuk keperluan debugging/logging
+  const itemData = cartStore.items.map(item => ({
+    product_id: item.product_id,
+    quantity: item.quantity + 1,
+  }));
+
+  console.log("Current cart items:", itemData[0]); // Hanya untuk debugging
+
+  try {
+    // Mengirimkan permintaan untuk menambah quantity produk
+    const response = await axios.put(
+      `http://wiguns-backend.test/api/carts/${id}`,
+      itemData[0],  // Mengirimkan objek itemData[0]
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`, // Token otorisasi
+        },
+      }
+    );
+    console.log("Item quantity increased:", response.data);
+    cartStore.fetchCart(); // Memuat ulang data keranjang
+  } catch (error) {
+    console.error("Error increasing item quantity:", error.response?.data || error.message);
+  }
+};
+
+const decreaseQuantity = async (id) => {
+  // Mengambil data item untuk keperluan debugging/logging
+  const itemData = cartStore.items.map(item => ({
+    product_id: item.product_id,
+    quantity: item.quantity - 1,
+  }));
+
+  console.log("Current cart items:", itemData[0]); // Hanya untuk debugging
+
+  try {
+    // Mengirimkan permintaan untuk menambah quantity produk
+    const response = await axios.put(
+      `http://wiguns-backend.test/api/carts/${id}`,
+      itemData[0],  // Mengirimkan objek itemData[0]
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`, // Token otorisasi
+        },
+      }
+    );
+    console.log("Item quantity increased:", response.data);
+    cartStore.fetchCart(); // Memuat ulang data keranjang
+  } catch (error) {
+    console.error("Error increasing item quantity:", error.response?.data || error.message);
+  }
+};
+
+
+// Pastikan `useCartStore` digunakan dengan benar
+
+
 onMounted(() => {
   if (!authStore.user) {
     router.push("/");
@@ -128,7 +198,7 @@ onMounted(() => {
                 <template v-if="cartStore.items.length > 0">
                   <tr v-for="item in cartStore.items" :key="item.id">
                     <td>
-                      <img :src="item.product.galleries[0].photo" alt="Product Image" class="img-thumbnail"
+                      <img :src="urlStorage(item.product.galleries[0].photo)" alt="Product Image" class="img-thumbnail"
                         style="width: 200px; height: 150px;" />
                     </td>
                     <td>
@@ -140,7 +210,22 @@ onMounted(() => {
                     </td>
                     <td>
                       <div class="d-flex align-items-center">
-                        <button class="btn btn-secondary btn-sm" @click="decreaseQuantity(item.id)">-</button>
+                        <button
+  v-if="item.quantity > 1"
+  class="btn btn-secondary btn-sm"
+  @click="decreaseQuantity(item.id)"
+>
+  -
+</button>
+
+<button
+  v-if="item.quantity <= 1"
+  class="btn btn-secondary btn-sm"
+  disabled
+>
+  -
+</button>
+
                         <span class="px-2">{{ item.quantity }}</span>
                         <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
                       </div>
@@ -155,8 +240,10 @@ onMounted(() => {
                     formatCurrency(cartStore.total) }}</b>
                   </td>
                   <td v-if="authStore.user.address == null">
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">Checkout</button>
-                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <button class="btn btn-warning" data-bs-toggle="modal"
+                      data-bs-target="#exampleModal">Checkout</button>
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                      aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
@@ -164,9 +251,10 @@ onMounted(() => {
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
-                            <p class="text-dark">Alamat belum diisi, silahkan pergi ke halaman 
-                              <a @click="goToProfile" href="#" class="text-primary">Profile User</a> 
-                              untuk isi alamat pengiriman anda!</p>
+                            <p class="text-dark">Alamat belum diisi, silahkan pergi ke halaman
+                              <a @click="goToProfile" href="#" class="text-primary">Profile User</a>
+                              untuk isi alamat pengiriman anda!
+                            </p>
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -193,10 +281,8 @@ onMounted(() => {
 export default {
   methods: {
     goToProfile() {
-      // Tutup modal
       const modal = document.querySelector('.modal');
       const modalBackdrop = document.querySelector('.modal-backdrop');
-      
       if (modal) {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
@@ -204,8 +290,6 @@ export default {
       if (modalBackdrop) {
         modalBackdrop.remove();
       }
-
-      // Navigasi ke halaman profile
       this.$router.push('/profileUser');
     }
   }

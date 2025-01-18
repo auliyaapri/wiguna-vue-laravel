@@ -13,3 +13,4 @@ import HomeProduct from "@/components/HomeProduct.vue";
   <AboutHome />
   <Footer />
 </template>
+

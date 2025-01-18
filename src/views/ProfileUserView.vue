@@ -2,6 +2,7 @@
 import { useAuthStore } from '../stores/authStore';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const getImageUser = ref('');
@@ -55,27 +56,6 @@ const handleFileChange = (e) => {
   }
 };
 
-// Fungsi untuk update profile
-// const handleSubmit = async () => {
-//   const dataToSend = {
-//     name: penampungData.value.name,
-//     email: penampungData.value.email,
-//     no_hp: penampungData.value.no_hp,
-//     zip_code: penampungData.value.zip_code,
-//     address: penampungData.value.address,
-//     image_profile: base64Image.value,
-//   };
-
-//   try {
-//     await axios.put(
-//       `http://wiguns-backend.test/api/users/update/${authStore.user.id}`, dataToSend
-//     );
-//     console.log('Response:', response.data);
-//     alert('Profile berhasil diupdate!');
-//   } catch (error) {
-      
-//   }
-// };
 const handleSubmit = async () => {
   const dataToSend = {
     name: penampungData.value.name,
@@ -94,8 +74,18 @@ const handleSubmit = async () => {
     );
 
     // Periksa status respons untuk memastikan sukses
-    if (response.status === 200 || response.status === 201) {
-      alert('Profile berhasil diupdate!');
+    if (response.status === 200 || response.status === 201) {      
+      Swal  // Tampilkan pesan sukses
+        .fire({
+          title: 'Profile berhasil diupdate!',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500,
+        })
+        .then(() => {
+          // Redirect ke halaman home
+          router.push('/profile');
+        });
     } else {
       alert(`Terjadi kesalahan: ${response.status}`);
     }
@@ -118,34 +108,16 @@ onMounted(() => {
     <div class="container">
       <!-- <h1>Edit Profile</h1> -->
       <form @submit.prevent="handleSubmit" class="profile-form">
-
-        <!-- <div class="form-group">
-          <label for="image_profile">Path Gambar:</label>
+        <div class="form-group">
+          <label for="image_profile">Upload Gambar:</label>
           <input type="file" id="image_profile" class="form-control" @change="handleFileChange" />
 
-          Menampilkan preview gambar
-          <div v-if="imagePreview" class="mt-2">
-            <img :src="imagePreview" alt="Preview Gambar" class="img-thumbnail" width="200" />
+
+          <div class="mt-2">
+            <img :src="imagePreview || `http://wiguns-backend.test/storage/profile_image/${getImageUser}`"
+              alt="Preview Gambar" class="img-thumbnail rounded-circle image_profile_edit" width="200" />
           </div>
-
-          <img :src='`http://wiguns-backend.test/storage/profile_image/${getImageUser}`' alt="dsdsds"
-            class="rounded-circle image_profile_edit">
-        </div> -->
-
-        <div class="form-group">
-  <label for="image_profile">Path Gambar:</label>
-  <input type="file" id="image_profile" class="form-control" @change="handleFileChange" />
-  
-  <!-- Menampilkan preview gambar jika ada -->
-  <div class="mt-2">
-    <img
-      :src="imagePreview || `http://wiguns-backend.test/storage/profile_image/${getImageUser}`"
-      alt="Preview Gambar"
-      class="img-thumbnail rounded-circle image_profile_edit"
-      width="200"
-    />
-  </div>
-</div>
+        </div>
 
         <div class="form-group">
           <label>Nama:</label>
@@ -172,7 +144,9 @@ onMounted(() => {
           <textarea v-model="penampungData.address" required class="form-control"></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Update Profile</button>
+        <router-link to="/" class="ms-2 btn btn-danger">Kembali</router-link>
       </form>
+      
     </div>
 
 
@@ -182,3 +156,4 @@ onMounted(() => {
 
 
 <style></style>
+
