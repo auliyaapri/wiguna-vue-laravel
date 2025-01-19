@@ -153,7 +153,10 @@ onMounted(() => {
                   <li>
                     <router-link class="dropdown-item" to="/profileUser"><i class="fas fa-user"></i> Profile
                       User</router-link>
+<<<<<<< HEAD
                     <router-link class="dropdown-item" to="/detailTransaction"><i class="fas fa-cart-shopping"></i> Detail Transaction</router-link>
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
                     <a class="dropdown-item" href="#" @click.prevent="handleLogout"><i class="fas fa-sign-out-alt"></i>
                       Logout</a>
                   </li>

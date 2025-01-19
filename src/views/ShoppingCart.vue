@@ -6,13 +6,20 @@ import { RouterLink, useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from "@/stores/Cart";
+<<<<<<< HEAD
 import Swal from 'sweetalert2';
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const user = ref({ ...authStore.user });
 
+<<<<<<< HEAD
 // console.log(authStore.user.address);  // Jika 'name' ada dalam objek user
+=======
+console.log(authStore.user.address);  // Jika 'name' ada dalam objek user
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
 
 
 const removeItem = async (id) => {
@@ -153,6 +160,7 @@ const decreaseQuantity = async (id) => {
 
 onMounted(() => {
   if (!authStore.user) {
+<<<<<<< HEAD
     Swal.fire({
       title: "You are not allowed to access",
       text: "You need to log in first.",
@@ -160,6 +168,8 @@ onMounted(() => {
       showConfirmButton: false,
       timer: 2500,
     });
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
     router.push("/");
   }
   cartStore.fetchCart();
@@ -218,6 +228,7 @@ onMounted(() => {
                     </td>
                     <td>
                       <div class="d-flex align-items-center">
+<<<<<<< HEAD
                         <button v-if="item.quantity > 1" class="btn btn-secondary btn-sm"
                           @click="decreaseQuantity(item.id)">
                           -
@@ -226,6 +237,23 @@ onMounted(() => {
                         <button v-if="item.quantity <= 1" class="btn btn-secondary btn-sm" disabled>
                           -
                         </button>
+=======
+                        <button
+  v-if="item.quantity > 1"
+  class="btn btn-secondary btn-sm"
+  @click="decreaseQuantity(item.id)"
+>
+  -
+</button>
+
+<button
+  v-if="item.quantity <= 1"
+  class="btn btn-secondary btn-sm"
+  disabled
+>
+  -
+</button>
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
 
                         <span class="px-2">{{ item.quantity }}</span>
                         <button class="btn btn-secondary btn-sm" @click="increaseQuantity(item.id)">+</button>
@@ -236,11 +264,15 @@ onMounted(() => {
                     </td>
                   </tr>
                 </template>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
                 <tr>
                   <td colspan="4" class="text-center align-content-center">Total Harga <b>{{
                     formatCurrency(cartStore.total) }}</b>
                   </td>
+<<<<<<< HEAD
                   <!-- <td v-if="authStore.user.address == null"> -->
                   <td v-if="authStore.user">
                     <span v-if="authStore.user.address === null">
@@ -269,6 +301,31 @@ onMounted(() => {
                       </div>
                     </span>
 
+=======
+                  <td v-if="authStore.user.address == null">
+                    <button class="btn btn-warning" data-bs-toggle="modal"
+                      data-bs-target="#exampleModal">Checkout</button>
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                      aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="text-dark">Alamat belum diisi, silahkan pergi ke halaman
+                              <a @click="goToProfile" href="#" class="text-primary">Profile User</a>
+                              untuk isi alamat pengiriman anda!
+                            </p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
                   </td>
                   <td v-else>
                     <button class="btn btn-success" @click="checkout()">Checkout</button>

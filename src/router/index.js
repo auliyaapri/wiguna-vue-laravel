@@ -10,8 +10,11 @@ import RegisterView from '@/views/RegisterView.vue'
 import ProfileUserView from '@/views/ProfileUserView.vue'
 import AboutView2 from '@/views/AboutView2.vue'
 import ContactView from '@/views/ContactView.vue'
+<<<<<<< HEAD
 import DetailTransaction from '@/views/DetailTransaction.vue'
 
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
 
 import bre from '@/views/bre.vue'
 
@@ -81,6 +84,7 @@ const router = createRouter({
       meta: { title: "Detail" }, // Title untuk rute ini
     },
     {
+<<<<<<< HEAD
       path: "/detailTransaction",
       name: "detailTransaction",
       props: true,
@@ -89,6 +93,8 @@ const router = createRouter({
     },
 
     {
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
       path: "/cart",
       name: "cart",
       component: ShoppingCart,

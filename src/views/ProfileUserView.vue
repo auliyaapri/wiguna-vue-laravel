@@ -3,7 +3,10 @@ import { useAuthStore } from '../stores/authStore';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+<<<<<<< HEAD
 import router from "@/router";
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
 
 const authStore = useAuthStore();
 const getImageUser = ref('');
@@ -38,7 +41,11 @@ const getUserData = async () => {
     getImageUser.value = userData.image_profile;
 
   } catch (error) {
+<<<<<<< HEAD
     
+=======
+    alert('Gagal mengambil data user');
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
   }
 };
 
@@ -93,11 +100,16 @@ const handleSubmit = async () => {
   } catch (error) {
     // Tampilkan pesan error lebih spesifik
     console.error('Error:', error);
+<<<<<<< HEAD
+=======
+    alert('Gagal mengupdate profile. Periksa koneksi atau coba lagi nanti.');
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
   }
 };
 
 // Panggil getUserData saat komponen dimount
 onMounted(() => {
+<<<<<<< HEAD
 
   if (!authStore.user) {
         Swal.fire({
@@ -110,6 +122,8 @@ onMounted(() => {
 
         router.push("/");
   }
+=======
+>>>>>>> 09455d458d42311d3de0785e196de13fe96210c2
   getUserData();
 });
 </script>
