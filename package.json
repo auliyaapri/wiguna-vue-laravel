@@ -1,0 +1,28 @@
+{
+  "name": "bwa-fullstack",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^43.1.0",
+    "@ckeditor/ckeditor5-vue": "^7.0.0",
+    "@popperjs/core": "^2.11.8",
+    "aos": "^3.0.0-beta.6",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.3.3",
+    "ckeditor5": "^43.1.0",
+    "pinia": "^2.2.4",
+    "sweetalert2": "^11.15.10",
+    "vue": "^3.5.11",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "vite": "^5.3.1"
+  }
+}
